@@ -1,0 +1,31 @@
+@url = http://localhost:8081
+@jwt = 
+@jwt_test = 
+@grant_type = client_credentials
+
+@client_id = 
+@client_secret = 
+@scope = 
+@token_url = 
+
+### Public
+GET {{url}}/public
+
+### Secure
+GET {{url}}/secure
+Authorization: Bearer {{jwt}}
+
+
+### Secure test token no roles
+GET {{url}}/secure
+Authorization: Bearer {{jwt_test}}
+
+### Secure
+GET {{url}}/secure
+
+
+### Get token
+POST {{token_url}}
+Content-Type: application/x-www-form-urlencoded
+
+grant_type={{grant_type}}&client_id={{client_id}}&client_secret={{client_secret}}&scope={{scope}}
