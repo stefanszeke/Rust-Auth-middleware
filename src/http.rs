@@ -1,15 +1,28 @@
-use axum::{http::StatusCode, response::IntoResponse, routing::get, Json, Router};
+use axum::{
+    http::StatusCode, middleware, response::IntoResponse, routing::get, Extension, Json, Router,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use utoipa::ToSchema;
 
-use crate::{app_state::AppState, auth::auth_middleware::Auth};
+use crate::{
+    app_state::AppState,
+    auth::auth_middleware::{auth_middleware, log_middleware, Auth},
+};
 
 pub fn create_router(state: AppState) -> Router {
-    Router::new()
+    let public_router = Router::new()
         .route("/public", get(public))
+        .route("/public2", get(public2));
+
+    let secure_router = Router::new()
         .route("/secure", get(secure))
-        .with_state(state)
+        .route_layer(middleware::from_fn_with_state(state, auth_middleware));
+
+    Router::new()
+        .merge(public_router)
+        .merge(secure_router)
+        .route_layer(middleware::from_fn(log_middleware))
 }
 
 #[utoipa::path(
@@ -32,10 +45,10 @@ async fn public() -> impl IntoResponse {
     )
 )]
 
-async fn secure(Auth(claims): Auth) -> impl IntoResponse {
+async fn secure(Extension(auth): Extension<Auth>) -> impl IntoResponse {
     let response = MyResponse {
         message: "Secure route".into(),
-        roles: claims.roles,
+        roles: auth.0.roles,
     };
 
     (StatusCode::OK, Json(response))
@@ -52,4 +65,8 @@ pub struct MyResponse {
 #[schema(example = json!({"message": "No token found"}))]
 pub struct MyErrorResponse {
     message: String,
+}
+
+async fn public2() -> impl IntoResponse {
+    (StatusCode::OK, Json(json!({"message": "Public route 2",})))
 }
