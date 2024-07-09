@@ -12,3 +12,8 @@ reqwest = { version = "0.12.5", features = ["json"] }
 jsonwebtoken = "9.3.0"
 dotenv = "0.15.0"
 utoipa = { version = "4.2.3", features = ["chrono", "axum_extras"] }
+
+[dev-dependencies]
+http-body-util = "0.1.1"
+mockito = "1.4.0"
+tower = "0.4.13"

@@ -94,3 +94,4 @@ fn unauthorized_response(message: &str) -> Response<String> {
         .body(Json(json!({"message": message})).to_string())
         .unwrap()
 }
+
